@@ -1,0 +1,1081 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: LearnPath - Personalized Learning & Implementation Platform
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: onboarding
+    description: User onboarding and goal setting
+  - name: content
+    description: Books, podcasts, philosophy, expert frameworks
+  - name: lessons
+    description: Individual lessons within content
+  - name: sessions
+    description: Active learning sessions
+  - name: saved-cards
+    description: Saved visual summary cards
+  - name: roadmaps
+    description: Implementation roadmaps and daily tasks
+  - name: profile
+    description: User profile, XP, streaks, achievements
+  - name: daily-feed
+    description: Personalized daily feed
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # ONBOARDING
+  /onboarding:
+    post:
+      operationId: completeOnboarding
+      tags: [onboarding]
+      summary: Submit onboarding answers and set user goals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OnboardingInput"
+      responses:
+        "200":
+          description: Onboarding complete, profile created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  # CONTENT
+  /content:
+    get:
+      operationId: listContent
+      tags: [content]
+      summary: List all content items, optionally filtered by type or goal
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [book, podcast, philosophy, framework, course]
+        - name: goal
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: List of content items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ContentItem"
+
+  /content/featured:
+    get:
+      operationId: getFeaturedContent
+      tags: [content]
+      summary: Get personalized featured content for the homepage (grouped by category)
+      responses:
+        "200":
+          description: Featured content sections
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeaturedContentResponse"
+
+  /content/{contentId}:
+    get:
+      operationId: getContent
+      tags: [content]
+      summary: Get a single content item with full details
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Content item details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentItemDetail"
+        "404":
+          description: Not found
+
+  # LESSONS
+  /content/{contentId}/lessons:
+    get:
+      operationId: listLessons
+      tags: [lessons]
+      summary: Get all lessons for a content item
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of lessons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lesson"
+
+  /content/{contentId}/lessons/{lessonId}:
+    get:
+      operationId: getLesson
+      tags: [lessons]
+      summary: Get a single lesson with full interactive content
+      parameters:
+        - name: contentId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: lessonId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lesson with full content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonDetail"
+
+  # SESSIONS
+  /sessions:
+    post:
+      operationId: startSession
+      tags: [sessions]
+      summary: Start a new learning session for a content item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SessionInput"
+      responses:
+        "201":
+          description: Session started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  /sessions/{sessionId}:
+    get:
+      operationId: getSession
+      tags: [sessions]
+      summary: Get current session state
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Session state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  /sessions/{sessionId}/complete-lesson:
+    post:
+      operationId: completeLessonInSession
+      tags: [sessions]
+      summary: Mark a lesson as complete in the session and earn XP
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompleteLessonInput"
+      responses:
+        "200":
+          description: Lesson completed, XP awarded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonCompletionResult"
+
+  /sessions/{sessionId}/quiz-answer:
+    post:
+      operationId: submitQuizAnswer
+      tags: [sessions]
+      summary: Submit an answer to a quiz question in the session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuizAnswerInput"
+      responses:
+        "200":
+          description: Quiz answer result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuizAnswerResult"
+
+  /sessions/{sessionId}/summary:
+    get:
+      operationId: getSessionSummary
+      tags: [sessions]
+      summary: Get the visual summary card for a completed session
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Visual summary card data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SummaryCard"
+
+  # SAVED CARDS
+  /saved-cards:
+    get:
+      operationId: listSavedCards
+      tags: [saved-cards]
+      summary: Get user's saved summary cards
+      responses:
+        "200":
+          description: List of saved cards
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SavedCard"
+
+    post:
+      operationId: saveCard
+      tags: [saved-cards]
+      summary: Save a summary card
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveCardInput"
+      responses:
+        "201":
+          description: Card saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SavedCard"
+
+  /saved-cards/{cardId}:
+    delete:
+      operationId: deleteSavedCard
+      tags: [saved-cards]
+      summary: Remove a saved card
+      parameters:
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Card deleted
+
+  # ROADMAPS
+  /roadmaps:
+    get:
+      operationId: listRoadmaps
+      tags: [roadmaps]
+      summary: Get user's active and completed implementation roadmaps
+      responses:
+        "200":
+          description: List of roadmaps
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Roadmap"
+
+    post:
+      operationId: createRoadmap
+      tags: [roadmaps]
+      summary: Start an implementation roadmap for a content item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RoadmapInput"
+      responses:
+        "201":
+          description: Roadmap created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Roadmap"
+
+  /roadmaps/{roadmapId}:
+    get:
+      operationId: getRoadmap
+      tags: [roadmaps]
+      summary: Get roadmap details with all tasks
+      parameters:
+        - name: roadmapId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Roadmap with daily tasks
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoadmapDetail"
+
+  /roadmaps/{roadmapId}/tasks/{taskId}/complete:
+    post:
+      operationId: completeRoadmapTask
+      tags: [roadmaps]
+      summary: Mark a daily task as complete and earn XP
+      parameters:
+        - name: roadmapId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Task completed, XP awarded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskCompletionResult"
+
+  # PROFILE
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [profile]
+      summary: Get current user profile with XP, level, streak
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+    patch:
+      operationId: updateProfile
+      tags: [profile]
+      summary: Update user profile or goals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /profile/achievements:
+    get:
+      operationId: listAchievements
+      tags: [profile]
+      summary: Get user achievements and badges
+      responses:
+        "200":
+          description: List of achievements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Achievement"
+
+  /profile/stats:
+    get:
+      operationId: getProfileStats
+      tags: [profile]
+      summary: Get user learning stats (XP history, content completed, streaks)
+      responses:
+        "200":
+          description: User stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileStats"
+
+  # DAILY FEED
+  /daily-feed:
+    get:
+      operationId: getDailyFeed
+      tags: [daily-feed]
+      summary: Get today's personalized feed with tasks, challenges, and new content
+      responses:
+        "200":
+          description: Daily personalized feed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyFeed"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    # ONBOARDING
+    OnboardingInput:
+      type: object
+      required: [name, goals, role]
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+          description: "student, professional, entrepreneur, etc."
+        goals:
+          type: array
+          items:
+            type: string
+          description: "productivity, focus, confidence, relationships, leadership, etc."
+        learningStyle:
+          type: string
+          enum: [visual, reading, interactive, mixed]
+        dailyMinutes:
+          type: integer
+          description: Available minutes per day for learning
+
+    # USER PROFILE
+    UserProfile:
+      type: object
+      required: [id, name, goals, xp, level, streak, onboardingComplete]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        role:
+          type: ["string", "null"]
+        goals:
+          type: array
+          items:
+            type: string
+        learningStyle:
+          type: ["string", "null"]
+        dailyMinutes:
+          type: ["integer", "null"]
+        xp:
+          type: integer
+        level:
+          type: integer
+        streak:
+          type: integer
+        longestStreak:
+          type: integer
+        onboardingComplete:
+          type: boolean
+        avatarColor:
+          type: ["string", "null"]
+        contentCompleted:
+          type: integer
+        lessonsCompleted:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+
+    ProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        goals:
+          type: array
+          items:
+            type: string
+        dailyMinutes:
+          type: integer
+
+    ProfileStats:
+      type: object
+      required: [totalXp, level, streak, longestStreak, contentCompleted, lessonsCompleted, tasksCompleted, totalMinutesLearned, xpThisWeek]
+      properties:
+        totalXp:
+          type: integer
+        level:
+          type: integer
+        streak:
+          type: integer
+        longestStreak:
+          type: integer
+        contentCompleted:
+          type: integer
+        lessonsCompleted:
+          type: integer
+        tasksCompleted:
+          type: integer
+        totalMinutesLearned:
+          type: integer
+        xpThisWeek:
+          type: integer
+        xpHistory:
+          type: array
+          items:
+            $ref: "#/components/schemas/XpHistoryPoint"
+
+    XpHistoryPoint:
+      type: object
+      required: [date, xp]
+      properties:
+        date:
+          type: string
+        xp:
+          type: integer
+
+    Achievement:
+      type: object
+      required: [id, title, description, icon, earnedAt, xpReward]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        xpReward:
+          type: integer
+        earnedAt:
+          type: ["string", "null"]
+          format: date-time
+        unlocked:
+          type: boolean
+
+    # CONTENT
+    ContentItem:
+      type: object
+      required: [id, type, title, author, coverColor, description, totalLessons, estimatedMinutes, goals, difficulty]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [book, podcast, philosophy, framework, course]
+        title:
+          type: string
+        author:
+          type: string
+        coverColor:
+          type: string
+        accentColor:
+          type: string
+        description:
+          type: string
+        totalLessons:
+          type: integer
+        estimatedMinutes:
+          type: integer
+        goals:
+          type: array
+          items:
+            type: string
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        xpReward:
+          type: integer
+        userProgress:
+          type: ["integer", "null"]
+          description: "0-100 percent complete for current user"
+        isStarted:
+          type: boolean
+        isCompleted:
+          type: boolean
+        hasRoadmap:
+          type: boolean
+
+    ContentItemDetail:
+      allOf:
+        - $ref: "#/components/schemas/ContentItem"
+        - type: object
+          properties:
+            keyInsights:
+              type: array
+              items:
+                type: string
+            lessonPreviews:
+              type: array
+              items:
+                $ref: "#/components/schemas/Lesson"
+
+    FeaturedContentSection:
+      type: object
+      required: [title, subtitle, items]
+      properties:
+        title:
+          type: string
+        subtitle:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContentItem"
+
+    FeaturedContentResponse:
+      type: object
+      required: [sections, continueReading]
+      properties:
+        sections:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeaturedContentSection"
+        continueReading:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContentItem"
+
+    # LESSONS
+    Lesson:
+      type: object
+      required: [id, contentId, order, title, type, durationMinutes]
+      properties:
+        id:
+          type: integer
+        contentId:
+          type: integer
+        order:
+          type: integer
+        title:
+          type: string
+        type:
+          type: string
+          enum: [concept, story, framework, reflection, challenge]
+        durationMinutes:
+          type: integer
+        xpReward:
+          type: integer
+        isCompleted:
+          type: boolean
+
+    LessonDetail:
+      allOf:
+        - $ref: "#/components/schemas/Lesson"
+        - type: object
+          required: [content]
+          properties:
+            content:
+              $ref: "#/components/schemas/LessonContent"
+
+    LessonContent:
+      type: object
+      required: [sections]
+      properties:
+        sections:
+          type: array
+          items:
+            $ref: "#/components/schemas/LessonSection"
+        quiz:
+          $ref: "#/components/schemas/Quiz"
+        summaryCard:
+          $ref: "#/components/schemas/SummaryCard"
+
+    LessonSection:
+      type: object
+      required: [id, type, content]
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [text, insight, quote, visual, challenge, reflection]
+        content:
+          type: string
+        title:
+          type: ["string", "null"]
+        highlight:
+          type: ["string", "null"]
+
+    Quiz:
+      type: object
+      required: [id, question, options, xpReward]
+      properties:
+        id:
+          type: integer
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        xpReward:
+          type: integer
+
+    SummaryCard:
+      type: object
+      required: [contentId, lessonId, title, keyTakeaways, coverColor]
+      properties:
+        contentId:
+          type: integer
+        lessonId:
+          type: integer
+        title:
+          type: string
+        keyTakeaways:
+          type: array
+          items:
+            type: string
+        coreInsight:
+          type: string
+        coverColor:
+          type: string
+        accentColor:
+          type: string
+
+    # SESSIONS
+    SessionInput:
+      type: object
+      required: [contentId, durationMinutes]
+      properties:
+        contentId:
+          type: integer
+        durationMinutes:
+          type: integer
+          enum: [2, 5, 10, 20]
+
+    Session:
+      type: object
+      required: [id, contentId, durationMinutes, status, currentLessonIndex, lessonsToComplete, xpEarned, startedAt]
+      properties:
+        id:
+          type: integer
+        contentId:
+          type: integer
+        durationMinutes:
+          type: integer
+        status:
+          type: string
+          enum: [active, completed, abandoned]
+        currentLessonIndex:
+          type: integer
+        lessonsToComplete:
+          type: array
+          items:
+            $ref: "#/components/schemas/Lesson"
+        xpEarned:
+          type: integer
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
+
+    CompleteLessonInput:
+      type: object
+      required: [lessonId]
+      properties:
+        lessonId:
+          type: integer
+        timeSpentSeconds:
+          type: integer
+
+    LessonCompletionResult:
+      type: object
+      required: [xpEarned, totalXp, levelUp, newLevel, sessionComplete]
+      properties:
+        xpEarned:
+          type: integer
+        totalXp:
+          type: integer
+        levelUp:
+          type: boolean
+        newLevel:
+          type: integer
+        sessionComplete:
+          type: boolean
+        streakUpdated:
+          type: boolean
+        newStreak:
+          type: integer
+
+    QuizAnswerInput:
+      type: object
+      required: [quizId, selectedIndex]
+      properties:
+        quizId:
+          type: integer
+        selectedIndex:
+          type: integer
+
+    QuizAnswerResult:
+      type: object
+      required: [correct, correctIndex, explanation, xpEarned]
+      properties:
+        correct:
+          type: boolean
+        correctIndex:
+          type: integer
+        explanation:
+          type: string
+        xpEarned:
+          type: integer
+
+    # SAVED CARDS
+    SaveCardInput:
+      type: object
+      required: [contentId, lessonId]
+      properties:
+        contentId:
+          type: integer
+        lessonId:
+          type: integer
+
+    SavedCard:
+      type: object
+      required: [id, contentId, lessonId, contentTitle, lessonTitle, keyTakeaways, coverColor, savedAt]
+      properties:
+        id:
+          type: integer
+        contentId:
+          type: integer
+        lessonId:
+          type: integer
+        contentTitle:
+          type: string
+        lessonTitle:
+          type: string
+        keyTakeaways:
+          type: array
+          items:
+            type: string
+        coreInsight:
+          type: ["string", "null"]
+        coverColor:
+          type: string
+        accentColor:
+          type: ["string", "null"]
+        savedAt:
+          type: string
+          format: date-time
+
+    # ROADMAPS
+    RoadmapInput:
+      type: object
+      required: [contentId, durationDays]
+      properties:
+        contentId:
+          type: integer
+        durationDays:
+          type: integer
+          enum: [30, 60, 90]
+
+    Roadmap:
+      type: object
+      required: [id, contentId, contentTitle, durationDays, startDate, status, completedTasks, totalTasks, currentDay, xpEarned]
+      properties:
+        id:
+          type: integer
+        contentId:
+          type: integer
+        contentTitle:
+          type: string
+        coverColor:
+          type: string
+        durationDays:
+          type: integer
+        startDate:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [active, completed, paused]
+        completedTasks:
+          type: integer
+        totalTasks:
+          type: integer
+        currentDay:
+          type: integer
+        xpEarned:
+          type: integer
+
+    DailyTask:
+      type: object
+      required: [id, roadmapId, day, type, title, description, xpReward, completed]
+      properties:
+        id:
+          type: integer
+        roadmapId:
+          type: integer
+        day:
+          type: integer
+        type:
+          type: string
+          enum: [habit, challenge, reflection, mini-game, action, review]
+        title:
+          type: string
+        description:
+          type: string
+        xpReward:
+          type: integer
+        completed:
+          type: boolean
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
+
+    RoadmapDetail:
+      allOf:
+        - $ref: "#/components/schemas/Roadmap"
+        - type: object
+          required: [todaysTasks, upcomingTasks]
+          properties:
+            todaysTasks:
+              type: array
+              items:
+                $ref: "#/components/schemas/DailyTask"
+            upcomingTasks:
+              type: array
+              items:
+                $ref: "#/components/schemas/DailyTask"
+            recentlyCompleted:
+              type: array
+              items:
+                $ref: "#/components/schemas/DailyTask"
+
+    TaskCompletionResult:
+      type: object
+      required: [xpEarned, totalXp, levelUp, newLevel]
+      properties:
+        xpEarned:
+          type: integer
+        totalXp:
+          type: integer
+        levelUp:
+          type: boolean
+        newLevel:
+          type: integer
+        streakUpdated:
+          type: boolean
+
+    # DAILY FEED
+    DailyFeedItem:
+      type: object
+      required: [type, title, description, xpReward]
+      properties:
+        type:
+          type: string
+          enum: [task, challenge, reflection, new-content, streak-reminder, achievement]
+        title:
+          type: string
+        description:
+          type: string
+        xpReward:
+          type: integer
+        contentId:
+          type: ["integer", "null"]
+        roadmapId:
+          type: ["integer", "null"]
+        taskId:
+          type: ["integer", "null"]
+
+    DailyFeed:
+      type: object
+      required: [greeting, date, dailyXpGoal, xpEarnedToday, items, streakData]
+      properties:
+        greeting:
+          type: string
+        date:
+          type: string
+        dailyXpGoal:
+          type: integer
+        xpEarnedToday:
+          type: integer
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DailyFeedItem"
+        streakData:
+          $ref: "#/components/schemas/StreakData"
+        suggestedContent:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContentItem"
+
+    StreakData:
+      type: object
+      required: [current, longest, daysThisWeek]
+      properties:
+        current:
+          type: integer
+        longest:
+          type: integer
+        daysThisWeek:
+          type: array
+          items:
+            type: boolean

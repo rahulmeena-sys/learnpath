@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "LearnPath - Personalized Learning Platform"
+version = "1.0.0"
+id = "artifacts/learn-app"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22464
+
+[services.development]
+run = "pnpm --filter @workspace/learn-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/learn-app", "run", "build" ]
+publicDir = "artifacts/learn-app/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22464"
+BASE_PATH = "/"
