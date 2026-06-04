@@ -5,6 +5,7 @@ import { requireAdmin } from "../middlewares/auth";
 import { asyncHandler, AppError } from "../middlewares/error";
 import { getReqUser } from "./helpers";
 import { generateContentDraft } from "../lib/content-gen";
+import { GeneratedContentSchema } from "../lib/content-schema";
 
 const router = Router();
 
@@ -33,14 +34,13 @@ const CONTENT_FIELDS = [
 ];
 const LESSON_FIELDS = ["order", "title", "type", "durationMinutes", "xpReward", "sections", "quiz", "summaryCard"];
 
-// Generate a draft from a title/topic, persist content (draft) + lessons.
-router.post("/admin/content/generate", asyncHandler(async (req, res) => {
-  const { title, author, type, difficulty, lessonCount } = req.body ?? {};
-  if (!title || typeof title !== "string") throw new AppError(400, "title is required");
-
-  const draft = await generateContentDraft({ title, author, type, difficulty, lessonCount });
-  const user = getReqUser(req);
-
+// Persist a validated draft (content + lessons) as a new draft row. Shared by
+// the AI-generate route and the provider-agnostic import route below.
+async function insertDraft(
+  draft: import("../lib/content-schema").GeneratedContent,
+  createdBy: number,
+  sourceInput: { title: string; author?: string; type: string },
+) {
   const [content] = await db
     .insert(contentTable)
     .values({
@@ -58,8 +58,8 @@ router.post("/admin/content/generate", asyncHandler(async (req, res) => {
       keyInsights: draft.keyInsights,
       hasRoadmap: draft.hasRoadmap,
       status: "draft",
-      createdBy: user.id,
-      sourceInput: { title, author, type: type ?? "book" },
+      createdBy,
+      sourceInput,
     })
     .returning();
 
@@ -79,7 +79,36 @@ router.post("/admin/content/generate", asyncHandler(async (req, res) => {
     );
   }
 
-  res.status(201).json(await withLessons(content.id));
+  return content.id;
+}
+
+// Generate a draft from a title/topic, persist content (draft) + lessons.
+router.post("/admin/content/generate", asyncHandler(async (req, res) => {
+  const { title, author, type, difficulty, lessonCount } = req.body ?? {};
+  if (!title || typeof title !== "string") throw new AppError(400, "title is required");
+
+  const draft = await generateContentDraft({ title, author, type, difficulty, lessonCount });
+  const user = getReqUser(req);
+  const id = await insertDraft(draft, user.id, { title, author, type: type ?? "book" });
+  res.status(201).json(await withLessons(id));
+}));
+
+// Import a pre-authored draft (same shape as the generator emits). Lets content
+// drafted anywhere — including Claude Code or another chat tool — enter the
+// review/publish lifecycle without needing the generation API configured.
+router.post("/admin/content/import", asyncHandler(async (req, res) => {
+  const parsed = GeneratedContentSchema.safeParse(req.body);
+  if (!parsed.success) {
+    throw new AppError(400, `Invalid content payload: ${parsed.error.message}`);
+  }
+  const draft = parsed.data;
+  const user = getReqUser(req);
+  const id = await insertDraft(draft, user.id, {
+    title: draft.title,
+    author: draft.author,
+    type: draft.type,
+  });
+  res.status(201).json(await withLessons(id));
 }));
 
 // List all content (drafts + published) for the review dashboard.

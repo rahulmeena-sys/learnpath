@@ -1,13 +1,24 @@
 import { Router } from "express";
-import { db, lessonsTable, lessonProgressTable } from "@workspace/db";
+import { db, lessonsTable, lessonProgressTable, contentTable } from "@workspace/db";
 import { and, eq } from "drizzle-orm";
 import { getReqUser } from "./helpers";
 
 const router = Router();
 
+// Lessons are only reachable through published content — drafts must not leak
+// even if a content id is guessed.
+async function isPublished(contentId: number) {
+  const row = await db.query.contentTable.findFirst({
+    where: and(eq(contentTable.id, contentId), eq(contentTable.status, "published")),
+    columns: { id: true },
+  });
+  return !!row;
+}
+
 router.get("/content/:contentId/lessons", async (req, res) => {
   const contentId = Number(req.params.contentId);
   if (isNaN(contentId)) return res.status(400).json({ error: "Invalid content id" });
+  if (!(await isPublished(contentId))) return res.status(404).json({ error: "Not found" });
 
   const user = getReqUser(req);
   const lessons = await db.query.lessonsTable.findMany({
@@ -41,6 +52,7 @@ router.get("/content/:contentId/lessons/:lessonId", async (req, res) => {
   const contentId = Number(req.params.contentId);
   const lessonId = Number(req.params.lessonId);
   if (isNaN(contentId) || isNaN(lessonId)) return res.status(400).json({ error: "Invalid params" });
+  if (!(await isPublished(contentId))) return res.status(404).json({ error: "Not found" });
 
   const lesson = await db.query.lessonsTable.findFirst({
     where: and(eq(lessonsTable.id, lessonId), eq(lessonsTable.contentId, contentId)),

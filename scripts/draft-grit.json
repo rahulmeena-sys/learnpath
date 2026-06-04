@@ -1,0 +1,227 @@
+{
+  "type": "book",
+  "title": "Grit: The Power of Passion and Perseverance",
+  "author": "Angela Duckworth",
+  "coverColor": "#7c3aed",
+  "accentColor": "#06b6d4",
+  "description": "Why sustained passion and perseverance toward long-term goals predicts achievement more reliably than raw talent — and how to grow your own grit.",
+  "totalLessons": 4,
+  "estimatedMinutes": 20,
+  "goals": ["mindset", "focus", "productivity"],
+  "difficulty": "intermediate",
+  "xpReward": 80,
+  "keyInsights": [
+    "Effort counts twice: talent times effort builds skill, and skill times effort produces achievement.",
+    "Grit is passion plus perseverance applied to one top-level goal over years, not intensity in bursts.",
+    "A growth mindset — believing ability can change — is the soil that grit grows in.",
+    "Deliberate practice on specific weaknesses beats mindless repetition.",
+    "Purpose, the conviction that your work matters to others, sustains effort when motivation fades."
+  ],
+  "hasRoadmap": true,
+  "lessons": [
+    {
+      "order": 1,
+      "title": "Effort Counts Twice",
+      "type": "concept",
+      "durationMinutes": 5,
+      "xpReward": 20,
+      "sections": [
+        {
+          "id": 1,
+          "type": "text",
+          "content": "We love to credit talent for success because it lets us off the hook. Duckworth's research on West Point cadets, spelling-bee finalists, and rookie teachers found something less flattering and more useful: the people who stuck with their goals outperformed the naturally gifted who drifted.",
+          "title": "Talent is overrated",
+          "highlight": null
+        },
+        {
+          "id": 2,
+          "type": "insight",
+          "content": "Talent x effort = skill. Skill x effort = achievement. Effort appears in the equation twice, which means showing up consistently compounds far more than a high starting point.",
+          "title": "The two-effort equation",
+          "highlight": "Effort counts twice"
+        },
+        {
+          "id": 3,
+          "type": "challenge",
+          "content": "Pick one skill you've labeled yourself 'not talented' at. Schedule three 20-minute practice blocks this week and track what changes. Let evidence, not self-image, decide.",
+          "title": "Test the equation",
+          "highlight": null
+        }
+      ],
+      "quiz": {
+        "id": 101,
+        "question": "According to Duckworth's equation, why does effort matter more than talent?",
+        "options": [
+          "Because talent does not exist",
+          "Because effort appears twice — building skill, then turning skill into achievement",
+          "Because talented people never work hard",
+          "Because achievement is purely random"
+        ],
+        "correctIndex": 1,
+        "explanation": "Effort builds skill from talent, then converts skill into achievement, so it factors into success twice.",
+        "xpReward": 10
+      },
+      "summaryCard": {
+        "title": "Effort Counts Twice",
+        "keyTakeaways": [
+          "Consistent effort compounds more than a high talent baseline.",
+          "Talent x effort = skill; skill x effort = achievement."
+        ],
+        "coreInsight": "Showing up repeatedly beats raw ability that goes unused."
+      }
+    },
+    {
+      "order": 2,
+      "title": "What Grit Actually Is",
+      "type": "framework",
+      "durationMinutes": 5,
+      "xpReward": 20,
+      "sections": [
+        {
+          "id": 1,
+          "type": "text",
+          "content": "Grit is not white-knuckle intensity for a weekend. It is the combination of passion and perseverance directed at a single top-level goal sustained across years.",
+          "title": "Two ingredients",
+          "highlight": null
+        },
+        {
+          "id": 2,
+          "type": "quote",
+          "content": "Enthusiasm is common. Endurance is rare.",
+          "title": "Endurance over enthusiasm",
+          "highlight": null
+        },
+        {
+          "id": 3,
+          "type": "reflection",
+          "content": "Name your single top-level goal — the one that organizes your mid-level and daily goals beneath it. If you can't, that vagueness is itself the thing to work on.",
+          "title": "Find your top-level goal",
+          "highlight": null
+        }
+      ],
+      "quiz": {
+        "id": 201,
+        "question": "Grit is best described as:",
+        "options": [
+          "Short bursts of maximum effort",
+          "Natural talent applied early",
+          "Passion and perseverance toward a long-term goal",
+          "Avoiding all distractions"
+        ],
+        "correctIndex": 2,
+        "explanation": "Grit pairs sustained passion with perseverance aimed at one enduring goal.",
+        "xpReward": 10
+      },
+      "summaryCard": {
+        "title": "What Grit Is",
+        "keyTakeaways": [
+          "Grit = passion + perseverance over years.",
+          "A clear top-level goal organizes everything beneath it."
+        ],
+        "coreInsight": "Endurance toward one goal matters more than fleeting enthusiasm."
+      }
+    },
+    {
+      "order": 3,
+      "title": "Practice Deliberately",
+      "type": "challenge",
+      "durationMinutes": 5,
+      "xpReward": 20,
+      "sections": [
+        {
+          "id": 1,
+          "type": "text",
+          "content": "Gritty experts don't just log hours — they practice deliberately: a stretch goal at the edge of ability, full focus, immediate feedback, and relentless reflection on what went wrong.",
+          "title": "Beyond mindless reps",
+          "highlight": null
+        },
+        {
+          "id": 2,
+          "type": "insight",
+          "content": "Target your weakest sub-skill, not the parts you already enjoy. Discomfort is the signal that you're practicing the right thing.",
+          "title": "Aim at weakness",
+          "highlight": "Practice your weakness"
+        },
+        {
+          "id": 3,
+          "type": "challenge",
+          "content": "For your top-level goal, isolate one specific weakness. Design a 15-minute drill that targets only it, with a way to get feedback. Do it tomorrow.",
+          "title": "Build one drill",
+          "highlight": null
+        }
+      ],
+      "quiz": {
+        "id": 301,
+        "question": "What distinguishes deliberate practice from ordinary repetition?",
+        "options": [
+          "It is always more enjoyable",
+          "It targets specific weaknesses with focus and feedback",
+          "It requires expensive equipment",
+          "It avoids any discomfort"
+        ],
+        "correctIndex": 1,
+        "explanation": "Deliberate practice means stretch goals on weak points, full concentration, and immediate feedback.",
+        "xpReward": 10
+      },
+      "summaryCard": {
+        "title": "Practice Deliberately",
+        "keyTakeaways": [
+          "Target weaknesses, not comfortable strengths.",
+          "Stretch goal + focus + feedback + reflection."
+        ],
+        "coreInsight": "Quality of practice beats quantity of hours."
+      }
+    },
+    {
+      "order": 4,
+      "title": "Purpose Sustains Effort",
+      "type": "reflection",
+      "durationMinutes": 5,
+      "xpReward": 20,
+      "sections": [
+        {
+          "id": 1,
+          "type": "text",
+          "content": "Interest gets you started, but purpose — the belief that your work helps others — is what keeps gritty people going decade after decade.",
+          "title": "From interest to purpose",
+          "highlight": null
+        },
+        {
+          "id": 2,
+          "type": "insight",
+          "content": "You can cultivate purpose by reflecting on how your daily work, however small, connects to the well-being of other people.",
+          "title": "Connect work to others",
+          "highlight": "Purpose outlasts motivation"
+        },
+        {
+          "id": 3,
+          "type": "reflection",
+          "content": "Write one sentence: how does the goal you named earlier make life better for someone other than you? Revisit it on the days motivation runs dry.",
+          "title": "Write your purpose statement",
+          "highlight": null
+        }
+      ],
+      "quiz": {
+        "id": 401,
+        "question": "Why does purpose strengthen grit over the long run?",
+        "options": [
+          "It removes the need for any effort",
+          "It guarantees instant results",
+          "Believing your work matters to others sustains effort when motivation fades",
+          "It replaces the need for practice"
+        ],
+        "correctIndex": 2,
+        "explanation": "Purpose — the conviction that work benefits others — keeps people persevering past the point where interest alone would quit.",
+        "xpReward": 10
+      },
+      "summaryCard": {
+        "title": "Purpose Sustains Effort",
+        "keyTakeaways": [
+          "Interest starts you; purpose keeps you going.",
+          "Connect daily work to others' well-being."
+        ],
+        "coreInsight": "Meaning is the fuel that outlasts motivation."
+      }
+    }
+  ]
+}
