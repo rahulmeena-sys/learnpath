@@ -2,6 +2,10 @@
 
 A single-user personalized learning and implementation platform. Users go through an onboarding quiz, then get curated content (books, podcasts, philosophy, frameworks), interactive learning sessions with quizzes, visual summary cards, implementation roadmaps, and gamification (XP, streaks, levels, achievements).
 
+## UI design / mockup workflow
+
+For designing and testing new UI (e.g. ChatGPT-generated designs): `UI_SPEC.md` is the full design-system + per-screen spec to hand to ChatGPT; `UI_WORKFLOW.md` is the Claude-facing guide for taking a design and running it; candidate designs go in `artifacts/learn-app/src/pages/sandbox/variants/` and render live at `/sandbox/<name>` without touching production pages. See `UI_WORKFLOW.md` before doing UI design tasks.
+
 ## Monorepo structure
 
 ```
@@ -38,7 +42,12 @@ pnpm run typecheck
 
 ## Architecture decisions
 
-**Single-user, no auth.** There is no authentication. All API routes use `DEFAULT_USER_ID = 1`. The user record is created automatically on first request via `getOrCreateDefaultUser()` in `artifacts/api-server/src/routes/helpers.ts`. Do not add auth without rethinking all routes.
+**Auth & multi-tenancy (Supabase Auth).** Users sign in via Supabase (email+password + Google). The API verifies the access token statelessly in `requireAuth` (`artifacts/api-server/src/middlewares/auth.ts`, JWKS/ES256), which provisions/loads the app user and sets `req.userId` + `req.appUser`. It is mounted in `routes/index.ts` before all routers except `health`.
+- **New endpoints**: get the user with `getReqUser(req)` (`routes/helpers.ts`) and scope every user-owned query by that user's id. Never trust a userId from the request body.
+- **New frontend pages**: need no auth code — the API client is already authenticated globally (token wired via `setAuthTokenGetter` in `artifacts/learn-app/src/lib/supabase.ts`). Auth lives behind `AuthProvider` + the `AuthGate` in `App.tsx`.
+- User identity columns on `usersTable`: `authId` (Supabase UUID = JWT `sub`) and `email`.
+
+**Content pipeline (hybrid: AI draft → review → publish).** `contentTable` has a `status` (`draft`/`published`) — public content routes serve only `published`. Admins (email in `ADMIN_EMAILS`) use `/api/admin/*` (gated by `requireAdmin`) to generate drafts (Claude Sonnet 4.6 via `src/lib/content-gen.ts`, structured output validated by `src/lib/content-schema.ts`), edit, and publish. Admin routes are plain Express (not in the OpenAPI/orval codegen); the admin page (`/admin`) calls them via `src/lib/adminFetch.ts`. Needs `ANTHROPIC_API_KEY` + `ADMIN_EMAILS`.
 
 **API-first with codegen.** The API contract lives in `lib/api-spec/`. Zod schemas (`lib/api-zod/`) and React Query hooks (`lib/api-client-react/`) are generated from it. After changing the OpenAPI spec, regenerate: `pnpm --filter @workspace/api-zod run generate && pnpm --filter @workspace/api-client-react run generate`.
 

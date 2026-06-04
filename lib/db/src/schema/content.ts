@@ -17,6 +17,11 @@ export const contentTable = pgTable("content", {
   xpReward: integer("xp_reward").notNull().default(100),
   keyInsights: jsonb("key_insights").$type<string[]>().notNull().default([]),
   hasRoadmap: boolean("has_roadmap").notNull().default(false),
+  // Publish lifecycle. Default 'published' so existing seeded rows stay visible;
+  // AI-generated content is inserted as 'draft' and only served once published.
+  status: text("status").notNull().default("published"), // draft | published | archived
+  createdBy: integer("created_by"), // admin user id (null for seeded content)
+  sourceInput: jsonb("source_input").$type<{ title: string; author?: string; type: string } | null>(),
 });
 
 export const insertContentSchema = createInsertSchema(contentTable).omit({ id: true });

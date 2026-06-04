@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db, contentTable, contentProgressTable } from "@workspace/db";
-import { eq, inArray, sql } from "drizzle-orm";
-import { getOrCreateDefaultUser } from "./helpers";
+import { and, eq, inArray, sql } from "drizzle-orm";
+import { getReqUser } from "./helpers";
 
 const router = Router();
 
@@ -41,12 +41,15 @@ async function enrichContentWithProgress(items: typeof contentTable.$inferSelect
 }
 
 router.get("/content", async (req, res) => {
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   const type = req.query.type as string | undefined;
   const goal = req.query.goal as string | undefined;
   const limit = Math.min(Number(req.query.limit) || 20, 50);
 
-  let items = await db.query.contentTable.findMany({ limit });
+  let items = await db.query.contentTable.findMany({
+    where: eq(contentTable.status, "published"),
+    limit,
+  });
 
   if (type) {
     items = items.filter((c) => c.type === type);
@@ -60,8 +63,10 @@ router.get("/content", async (req, res) => {
 });
 
 router.get("/content/featured", async (req, res) => {
-  const user = await getOrCreateDefaultUser();
-  const allContent = await db.query.contentTable.findMany();
+  const user = getReqUser(req);
+  const allContent = await db.query.contentTable.findMany({
+    where: eq(contentTable.status, "published"),
+  });
   const enriched = await enrichContentWithProgress(allContent, user.id);
 
   const userGoals = user.goals as string[];
@@ -86,9 +91,9 @@ router.get("/content/:contentId", async (req, res) => {
   const contentId = Number(req.params.contentId);
   if (isNaN(contentId)) return res.status(400).json({ error: "Invalid content id" });
 
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   const item = await db.query.contentTable.findFirst({
-    where: eq(contentTable.id, contentId),
+    where: and(eq(contentTable.id, contentId), eq(contentTable.status, "published")),
   });
   if (!item) return res.status(404).json({ error: "Not found" });
 
