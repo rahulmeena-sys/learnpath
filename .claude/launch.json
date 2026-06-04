@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "learn-app",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["./.claude/start-frontend.mjs"],
+      "port": 22464
+    }
+  ]
+}

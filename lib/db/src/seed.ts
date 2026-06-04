@@ -259,8 +259,8 @@ function makeLessons(contentId: number, insights: string[], bookTitle: string) {
     sections: [
       { id: 1, type: "text", title: "From Insight to Action", content: "Theory only becomes powerful when it meets reality. In this lesson, we explore how to make these ideas work in your actual life — not an idealized version of it, but the messy, constraint-filled version you actually live in." },
       { id: 2, type: "insight", title: "The Implementation Gap", content: get(3), highlight: null },
-      { id: 3, type: "reflection", title: "Self-Assessment", content: "On a scale of 1–10: how well are you currently applying this principle? What one specific situation in your life would benefit most from a change?", title: null, highlight: null },
-      { id: 4, type: "challenge", title: "Your First Step", content: "Identify ONE specific, actionable change you can make today — not tomorrow. A real first step takes less than 5 minutes and requires zero perfect conditions.", title: null, highlight: null },
+      { id: 3, type: "reflection", title: "Self-Assessment", content: "On a scale of 1–10: how well are you currently applying this principle? What one specific situation in your life would benefit most from a change?", highlight: null },
+      { id: 4, type: "challenge", title: "Your First Step", content: "Identify ONE specific, actionable change you can make today — not tomorrow. A real first step takes less than 5 minutes and requires zero perfect conditions.", highlight: null },
     ] as LessonSection[],
     quiz: {
       id: contentId * 100 + 3,
@@ -325,8 +325,8 @@ function makeLessons(contentId: number, insights: string[], bookTitle: string) {
     xpReward: 35,
     sections: [
       { id: 1, type: "text", title: "Your Personal Plan", content: `You have absorbed the key ideas from "${bookTitle}". Now it is time to build your implementation blueprint — the specific plan that turns insight into lasting change in your actual life.` },
-      { id: 2, type: "challenge", title: "The 3-Day Challenge", content: "For the next 3 days, pick one principle from this material and apply it deliberately. Write down what you noticed each evening. That is it. No more, no less. Just 3 days.", title: null, highlight: null },
-      { id: 3, type: "reflection", title: "Final Reflection", content: "What is the single most important thing you are taking from this material? Write it in one sentence. This sentence is your anchor — return to it when you lose direction or momentum.", title: null, highlight: null },
+      { id: 2, type: "challenge", title: "The 3-Day Challenge", content: "For the next 3 days, pick one principle from this material and apply it deliberately. Write down what you noticed each evening. That is it. No more, no less. Just 3 days.", highlight: null },
+      { id: 3, type: "reflection", title: "Final Reflection", content: "What is the single most important thing you are taking from this material? Write it in one sentence. This sentence is your anchor — return to it when you lose direction or momentum.", highlight: null },
       { id: 4, type: "insight", title: "The Commitment", content: "Every expert was once a beginner who decided to take the first step. Your first step starts right now, not when conditions are perfect.", highlight: "The best time to start was yesterday. The second best time is now." },
     ] as LessonSection[],
     quiz: {
