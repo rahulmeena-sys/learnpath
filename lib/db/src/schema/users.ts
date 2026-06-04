@@ -4,6 +4,12 @@ import { z } from "zod/v4";
 
 export const usersTable = pgTable("users", {
   id: serial("id").primaryKey(),
+  // Supabase Auth identity: the JWT `sub` (user UUID) and email. Nullable so
+  // pre-auth/seed rows remain valid; real users always have authId set.
+  // Uniqueness is enforced in app code (getOrCreateUserByAuth find-or-create);
+  // a DB unique index can be added once the table holds only real users.
+  authId: text("auth_id"),
+  email: text("email"),
   name: text("name").notNull(),
   role: text("role"),
   goals: jsonb("goals").$type<string[]>().notNull().default([]),

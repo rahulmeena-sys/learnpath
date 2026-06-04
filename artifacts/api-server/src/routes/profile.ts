@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, usersTable, achievementsTable, userAchievementsTable, xpHistoryTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { UpdateProfileBody } from "@workspace/api-zod";
-import { getOrCreateDefaultUser, getLevelFromXp } from "./helpers";
+import { getReqUser, getLevelFromXp } from "./helpers";
 
 const router = Router();
 
@@ -27,7 +27,7 @@ function formatProfile(user: typeof usersTable.$inferSelect) {
 }
 
 router.get("/profile", async (req, res) => {
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   return res.json(formatProfile(user));
 });
 
@@ -35,7 +35,7 @@ router.patch("/profile", async (req, res) => {
   const parsed = UpdateProfileBody.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Invalid body" });
 
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   const { name, goals, dailyMinutes } = parsed.data;
 
   const [updated] = await db
@@ -48,7 +48,7 @@ router.patch("/profile", async (req, res) => {
 });
 
 router.get("/profile/achievements", async (req, res) => {
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   const allAchievements = await db.query.achievementsTable.findMany();
   const earned = await db.query.userAchievementsTable.findMany({
     where: eq(userAchievementsTable.userId, user.id),
@@ -72,7 +72,7 @@ router.get("/profile/achievements", async (req, res) => {
 });
 
 router.get("/profile/stats", async (req, res) => {
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
 
   // Summarize XP history for past 7 days
   const history = await db.query.xpHistoryTable.findMany({

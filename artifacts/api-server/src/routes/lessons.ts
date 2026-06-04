@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db, lessonsTable, lessonProgressTable } from "@workspace/db";
 import { and, eq } from "drizzle-orm";
-import { getOrCreateDefaultUser } from "./helpers";
+import { getReqUser } from "./helpers";
 
 const router = Router();
 
@@ -9,7 +9,7 @@ router.get("/content/:contentId/lessons", async (req, res) => {
   const contentId = Number(req.params.contentId);
   if (isNaN(contentId)) return res.status(400).json({ error: "Invalid content id" });
 
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   const lessons = await db.query.lessonsTable.findMany({
     where: eq(lessonsTable.contentId, contentId),
     orderBy: (l, { asc }) => [asc(l.order)],

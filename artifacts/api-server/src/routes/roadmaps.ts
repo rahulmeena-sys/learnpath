@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, roadmapsTable, dailyTasksTable, contentTable, usersTable } from "@workspace/db";
 import { and, eq } from "drizzle-orm";
 import { CreateRoadmapBody } from "@workspace/api-zod";
-import { getOrCreateDefaultUser, getLevelFromXp, getTodayString } from "./helpers";
+import { getReqUser, getLevelFromXp, getTodayString } from "./helpers";
 
 const router = Router();
 
@@ -59,7 +59,7 @@ function formatRoadmap(r: typeof roadmapsTable.$inferSelect, content: typeof con
 }
 
 router.get("/roadmaps", async (req, res) => {
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   const roadmaps = await db.query.roadmapsTable.findMany({
     where: eq(roadmapsTable.userId, user.id),
   });
@@ -77,7 +77,7 @@ router.post("/roadmaps", async (req, res) => {
   const parsed = CreateRoadmapBody.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Invalid body" });
 
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   const { contentId, durationDays } = parsed.data;
 
   const content = await db.query.contentTable.findFirst({ where: eq(contentTable.id, contentId) });
@@ -98,7 +98,7 @@ router.get("/roadmaps/:roadmapId", async (req, res) => {
   const roadmapId = Number(req.params.roadmapId);
   if (isNaN(roadmapId)) return res.status(400).json({ error: "Invalid id" });
 
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   const roadmap = await db.query.roadmapsTable.findFirst({
     where: and(eq(roadmapsTable.id, roadmapId), eq(roadmapsTable.userId, user.id)),
   });
@@ -140,9 +140,17 @@ router.post("/roadmaps/:roadmapId/tasks/:taskId/complete", async (req, res) => {
   const taskId = Number(req.params.taskId);
   if (isNaN(roadmapId) || isNaN(taskId)) return res.status(400).json({ error: "Invalid params" });
 
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
+
+  // Ownership: the roadmap must belong to the caller, and the task must belong
+  // to that roadmap. Prevents completing another user's tasks (IDOR).
+  const roadmap = await db.query.roadmapsTable.findFirst({
+    where: and(eq(roadmapsTable.id, roadmapId), eq(roadmapsTable.userId, user.id)),
+  });
+  if (!roadmap) return res.status(404).json({ error: "Not found" });
+
   const task = await db.query.dailyTasksTable.findFirst({ where: eq(dailyTasksTable.id, taskId) });
-  if (!task) return res.status(404).json({ error: "Not found" });
+  if (!task || task.roadmapId !== roadmapId) return res.status(404).json({ error: "Not found" });
 
   await db.update(dailyTasksTable).set({ completed: true, completedAt: new Date() }).where(eq(dailyTasksTable.id, taskId));
   await db.update(roadmapsTable).set({ completedTasks: task.roadmapId }).where(eq(roadmapsTable.id, roadmapId));

@@ -2,8 +2,10 @@ import { useLocation } from "wouter";
 import { motion } from "framer-motion";
 import { useGetProfile, useGetProfileStats, useListAchievements, getGetProfileQueryKey, getGetProfileStatsQueryKey } from "@workspace/api-client-react";
 import { ResponsiveContainer, AreaChart, Area, Tooltip, XAxis } from "recharts";
-import { Bookmark, Zap, Flame, Trophy, BookOpen, Clock, Target } from "lucide-react";
+import { Bookmark, Zap, Flame, Trophy, BookOpen, Clock, Target, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ErrorState, LoadingState } from "@/components/feedback/states";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 function StatCard({ icon: Icon, label, value, color }: { icon: any; label: string; value: string | number; color: string }) {
   return (
@@ -21,9 +23,10 @@ function StatCard({ icon: Icon, label, value, color }: { icon: any; label: strin
 
 export default function Profile() {
   const [, setLocation] = useLocation();
-  const { data: profile } = useGetProfile();
+  const { data: profile, isLoading, isError, refetch } = useGetProfile();
   const { data: stats } = useGetProfileStats();
   const { data: achievements } = useListAchievements();
+  const { signOut } = useAuth();
 
   const xpToNextLevel = profile ? ((profile.level) * (profile.level) * 50) - profile.xp : 0;
   const xpForLevel = profile ? ((profile.level - 1) * (profile.level - 1) * 50) : 0;
@@ -37,6 +40,13 @@ export default function Profile() {
 
   const unlockedAchievements = achievements?.filter((a) => a.unlocked) ?? [];
   const lockedAchievements = achievements?.filter((a) => !a.unlocked) ?? [];
+
+  if (isError) {
+    return <ErrorState message="We couldn't load your profile." onRetry={() => refetch()} />;
+  }
+  if (isLoading && !profile) {
+    return <LoadingState />;
+  }
 
   return (
     <div className="pt-6 pb-6 space-y-6">
@@ -193,6 +203,18 @@ export default function Profile() {
             <p className="font-semibold text-sm">Saved Summary Cards</p>
             <p className="text-xs text-muted-foreground">Review your saved insights</p>
           </div>
+        </button>
+      </div>
+
+      {/* Sign out */}
+      <div className="px-5">
+        <button
+          data-testid="button-sign-out"
+          onClick={() => signOut()}
+          className="w-full flex items-center justify-center gap-2 py-3 text-sm text-muted-foreground hover:text-foreground transition"
+        >
+          <LogOut className="w-4 h-4" />
+          Sign out
         </button>
       </div>
 

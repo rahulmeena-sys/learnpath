@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, sessionsTable, lessonsTable, lessonProgressTable, contentProgressTable, usersTable, contentTable } from "@workspace/db";
 import { and, eq } from "drizzle-orm";
 import { StartSessionBody, CompleteLessonInSessionBody, SubmitQuizAnswerBody } from "@workspace/api-zod";
-import { getOrCreateDefaultUser, getLevelFromXp, getTodayString } from "./helpers";
+import { getReqUser, getLevelFromXp, getTodayString } from "./helpers";
 
 const router = Router();
 
@@ -21,7 +21,7 @@ router.post("/sessions", async (req, res) => {
   const parsed = StartSessionBody.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Invalid body" });
 
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   const { contentId, durationMinutes } = parsed.data;
 
   const allLessons = await db.query.lessonsTable.findMany({
@@ -70,7 +70,7 @@ router.get("/sessions/:sessionId", async (req, res) => {
   const sessionId = Number(req.params.sessionId);
   if (isNaN(sessionId)) return res.status(400).json({ error: "Invalid session id" });
 
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   const session = await db.query.sessionsTable.findFirst({
     where: and(eq(sessionsTable.id, sessionId), eq(sessionsTable.userId, user.id)),
   });
@@ -111,7 +111,7 @@ router.post("/sessions/:sessionId/complete-lesson", async (req, res) => {
   const parsed = CompleteLessonInSessionBody.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Invalid body" });
 
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   const session = await db.query.sessionsTable.findFirst({
     where: and(eq(sessionsTable.id, sessionId), eq(sessionsTable.userId, user.id)),
   });
@@ -219,7 +219,7 @@ router.post("/sessions/:sessionId/quiz-answer", async (req, res) => {
   const xpEarned = correct ? quiz.xpReward : Math.floor(quiz.xpReward / 2);
 
   if (xpEarned > 0) {
-    const user = await getOrCreateDefaultUser();
+    const user = getReqUser(req);
     await db.update(usersTable).set({ xp: user.xp + xpEarned }).where(eq(usersTable.id, user.id));
   }
 
@@ -235,7 +235,7 @@ router.get("/sessions/:sessionId/summary", async (req, res) => {
   const sessionId = Number(req.params.sessionId);
   if (isNaN(sessionId)) return res.status(400).json({ error: "Invalid" });
 
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   const session = await db.query.sessionsTable.findFirst({
     where: and(eq(sessionsTable.id, sessionId), eq(sessionsTable.userId, user.id)),
   });

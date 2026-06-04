@@ -1,12 +1,12 @@
 import { Router } from "express";
 import { db, roadmapsTable, dailyTasksTable, contentTable, contentProgressTable } from "@workspace/db";
 import { and, eq } from "drizzle-orm";
-import { getOrCreateDefaultUser, getTodayString } from "./helpers";
+import { getReqUser, getTodayString } from "./helpers";
 
 const router = Router();
 
 router.get("/daily-feed", async (req, res) => {
-  const user = await getOrCreateDefaultUser();
+  const user = getReqUser(req);
   const today = getTodayString();
   const dayOfWeek = new Date().getDay(); // 0=Sun
 
