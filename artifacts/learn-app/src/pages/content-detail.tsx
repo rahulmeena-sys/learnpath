@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { useGetContent, useStartSession, getGetSessionQueryKey } from "@workspace/api-client-react";
+import {
+  useGetContent,
+  useStartSession,
+  getGetContentQueryKey,
+  type SessionInputDurationMinutes,
+} from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Clock, Zap, BookOpen, Map, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,7 +31,7 @@ export default function ContentDetail() {
   const startSession = useStartSession();
 
   async function handleBegin() {
-    const session = await startSession.mutateAsync({ data: { contentId: id, durationMinutes: selectedDuration } });
+    const session = await startSession.mutateAsync({ data: { contentId: id, durationMinutes: selectedDuration as SessionInputDurationMinutes } });
     setLocation(`/learn/${session.id}`);
   }
 

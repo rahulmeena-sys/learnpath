@@ -4,6 +4,7 @@ import { useGetDailyFeed, useCompleteRoadmapTask, getGetDailyFeedQueryKey } from
 import { useQueryClient } from "@tanstack/react-query";
 import { Flame, Zap, CheckCircle, Play, Target, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ErrorState } from "@/components/feedback/states";
 
 const ITEM_TYPE_STYLES: Record<string, string> = {
   task: "border-primary/30 bg-primary/5",
@@ -26,7 +27,7 @@ const ITEM_ICONS: Record<string, any> = {
 export default function Today() {
   const [, setLocation] = useLocation();
   const qc = useQueryClient();
-  const { data: feed, isLoading } = useGetDailyFeed();
+  const { data: feed, isLoading, isError, refetch } = useGetDailyFeed();
   const completeTask = useCompleteRoadmapTask();
 
   async function handleCompleteTask(item: any) {
@@ -101,6 +102,10 @@ export default function Today() {
       {/* Feed items */}
       <div className="px-5 space-y-3">
         <h2 className="font-bold text-xs uppercase tracking-widest text-muted-foreground">Today's Agenda</h2>
+
+        {isError && (
+          <ErrorState message="We couldn't load today's agenda." onRetry={() => refetch()} />
+        )}
 
         {isLoading && (
           <div className="space-y-3">

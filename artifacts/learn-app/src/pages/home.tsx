@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useGetFeaturedContent, useGetProfile } from "@workspace/api-client-react";
 import { BookOpen, Zap, Flame, ChevronRight, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ErrorState } from "@/components/feedback/states";
 
 function ContentTile({ item, index }: { item: any; index: number }) {
   const [, setLocation] = useLocation();
@@ -76,7 +77,7 @@ function Section({ section, startIndex }: { section: any; startIndex: number }) 
 
 export default function Home() {
   const [, setLocation] = useLocation();
-  const { data: featured, isLoading } = useGetFeaturedContent();
+  const { data: featured, isLoading, isError, refetch } = useGetFeaturedContent();
   const { data: profile } = useGetProfile();
 
   const dailyGoal = profile?.dailyMinutes ? profile.dailyMinutes * 2 : 20;
@@ -151,6 +152,11 @@ export default function Home() {
             ))}
           </div>
         </div>
+      )}
+
+      {/* Error state */}
+      {isError && (
+        <ErrorState message="We couldn't load your feed." onRetry={() => refetch()} />
       )}
 
       {/* Featured sections */}

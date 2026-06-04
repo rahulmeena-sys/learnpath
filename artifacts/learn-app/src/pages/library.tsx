@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { useListContent } from "@workspace/api-client-react";
+import { useListContent, type ListContentType } from "@workspace/api-client-react";
 import { Search, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ErrorState } from "@/components/feedback/states";
 
 const TYPE_FILTERS = [
   { value: undefined, label: "All" },
@@ -24,7 +25,7 @@ export default function Library() {
   const [, setLocation] = useLocation();
   const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
   const [search, setSearch] = useState("");
-  const { data: content, isLoading } = useListContent({ type: typeFilter });
+  const { data: content, isLoading, isError, refetch } = useListContent({ type: typeFilter as ListContentType | undefined });
 
   const filtered = content?.filter((c) =>
     search.trim() === "" ||
@@ -71,6 +72,10 @@ export default function Library() {
 
       {/* Grid */}
       <div className="px-5">
+        {isError && (
+          <ErrorState message="We couldn't load the library." onRetry={() => refetch()} />
+        )}
+
         {isLoading && (
           <div className="grid grid-cols-2 gap-3">
             {Array.from({ length: 6 }).map((_, i) => (

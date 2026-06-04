@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion } from "framer-motion";
-import { useListRoadmaps, useGetFeaturedContent, useCreateRoadmap } from "@workspace/api-client-react";
+import { useListRoadmaps, useGetFeaturedContent, useCreateRoadmap, type RoadmapInputDurationDays } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getListRoadmapsQueryKey } from "@workspace/api-client-react";
 import { Map, Plus, ChevronRight, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ErrorState } from "@/components/feedback/states";
 
 const DURATION_OPTIONS = [
   { days: 30, label: "30 Days", sub: "Foundation" },
@@ -32,7 +33,7 @@ function ProgressRing({ pct, color }: { pct: number; color: string }) {
 export default function Roadmaps() {
   const [, setLocation] = useLocation();
   const qc = useQueryClient();
-  const { data: roadmaps, isLoading } = useListRoadmaps();
+  const { data: roadmaps, isLoading, isError, refetch } = useListRoadmaps();
   const { data: featured } = useGetFeaturedContent();
   const createRoadmap = useCreateRoadmap();
   const [showCreate, setShowCreate] = useState(false);
@@ -48,7 +49,7 @@ export default function Roadmaps() {
     if (!selectedContent) return;
     setCreating(true);
     try {
-      const roadmap = await createRoadmap.mutateAsync({ data: { contentId: selectedContent, durationDays: selectedDuration } });
+      const roadmap = await createRoadmap.mutateAsync({ data: { contentId: selectedContent, durationDays: selectedDuration as RoadmapInputDurationDays } });
       await qc.invalidateQueries({ queryKey: getListRoadmapsQueryKey() });
       setShowCreate(false);
       setLocation(`/roadmaps/${roadmap.id}`);
@@ -73,6 +74,10 @@ export default function Roadmaps() {
           <Plus className="w-5 h-5 text-white" />
         </motion.button>
       </div>
+
+      {isError && (
+        <ErrorState message="We couldn't load your roadmaps." onRetry={() => refetch()} />
+      )}
 
       {isLoading && (
         <div className="px-5 space-y-3">
