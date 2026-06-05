@@ -1,2 +1,0 @@
-- [LearnPath Architecture](learnpath-architecture.md) — Single-user learning platform: Express API on port 8080, React+Vite frontend on port 22464, Drizzle ORM with PostgreSQL.
-- [LearnPath Seed](learnpath-seed.md) — Database seed runs via `pnpm --filter @workspace/db run seed`; tsx must be in db devDependencies.
