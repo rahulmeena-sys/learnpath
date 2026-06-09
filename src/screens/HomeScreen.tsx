@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   sectionSub: { ...typography.tiny, color: colors.muted, paddingHorizontal: spacing.lg, marginBottom: spacing.sm },
   hList: { paddingHorizontal: spacing.lg, gap: spacing.sm },
   tile: { width: 176, height: 224, borderRadius: radius.lg, overflow: 'hidden' },
-  tileOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
+  tileOverlay: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(0,0,0,0.35)' },
   tileInner: { flex: 1, padding: spacing.md, justifyContent: 'space-between' },
   typeChip: { backgroundColor: 'rgba(0,0,0,0.35)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.full, alignSelf: 'flex-start' },
   typeChipText: { fontSize: 9, fontWeight: '700', color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: 1 },

@@ -9,11 +9,14 @@ import HomeScreen from '../screens/HomeScreen';
 import TodayScreen from '../screens/TodayScreen';
 import LibraryScreen from '../screens/LibraryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import AdminScreen from '../screens/AdminScreen';
 import { colors } from '../theme';
 
 const Tab = createBottomTabNavigator();
 
 function MainTabs() {
+  const { profile } = useAuth();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -33,6 +36,7 @@ function MainTabs() {
             Home: { active: 'home', inactive: 'home-outline' },
             Today: { active: 'calendar', inactive: 'calendar-outline' },
             Library: { active: 'library', inactive: 'library-outline' },
+            Admin: { active: 'shield-checkmark', inactive: 'shield-checkmark-outline' },
             Profile: { active: 'person-circle', inactive: 'person-circle-outline' },
           };
           const icon = icons[route.name];
@@ -43,6 +47,7 @@ function MainTabs() {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Today" component={TodayScreen} />
       <Tab.Screen name="Library" component={LibraryScreen} />
+      {profile?.is_admin && <Tab.Screen name="Admin" component={AdminScreen} />}
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

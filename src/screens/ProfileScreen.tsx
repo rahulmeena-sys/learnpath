@@ -75,8 +75,8 @@ export default function ProfileScreen() {
       <View style={styles.statsGrid}>
         <StatCard label="Day streak" value={profile.streak} icon="flame" iconColor="#f97316" />
         <StatCard label="Best streak" value={profile.longest_streak} icon="star" iconColor="#facc15" />
-        <StatCard label="Books done" value={profile.content_completed} icon="library" iconColor={colors.accent} />
-        <StatCard label="Lessons done" value={profile.lessons_completed} icon="checkmark-circle" iconColor="#4ade80" />
+        <StatCard label="Books done" value={profile.content_completed ?? 0} icon="library" iconColor={colors.accent} />
+        <StatCard label="Lessons done" value={profile.lessons_completed ?? 0} icon="checkmark-circle" iconColor="#4ade80" />
       </View>
 
       {/* Daily goal */}

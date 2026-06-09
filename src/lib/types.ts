@@ -36,6 +36,7 @@ export type Profile = {
   email: string | null;
   avatar_url: string | null;
   role: string | null;
+  is_admin: boolean;
   goals: string[];
   daily_minutes: number;
   onboarding_complete: boolean;
@@ -43,6 +44,8 @@ export type Profile = {
   level: number;
   streak: number;
   longest_streak: number;
+  content_completed: number;
+  lessons_completed: number;
   last_active_date: string | null;
 };
 

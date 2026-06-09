@@ -52,6 +52,7 @@ create table profiles (
   email               text,
   avatar_url          text,
   role                text,
+  is_admin            boolean not null default false,
   goals               jsonb not null default '[]',
   daily_minutes       int not null default 10,
   onboarding_complete boolean not null default false,
@@ -59,12 +60,34 @@ create table profiles (
   level               int not null default 1,
   streak              int not null default 0,
   longest_streak      int not null default 0,
+  content_completed   int not null default 0,
+  lessons_completed   int not null default 0,
   last_active_date    text,
   created_at          timestamptz not null default now()
 );
 alter table profiles enable row level security;
 create policy "own profile" on profiles for all
   using (auth.uid() = id) with check (auth.uid() = id);
+
+alter table books enable row level security;
+create policy "published books readable" on books for select
+  using (
+    status = 'published'
+    or exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true)
+  );
+create policy "admins manage books" on books for all
+  using (exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true))
+  with check (exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true));
+
+alter table lessons enable row level security;
+create policy "published lessons readable" on lessons for select
+  using (
+    exists (select 1 from books where books.id = lessons.book_id and books.status = 'published')
+    or exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true)
+  );
+create policy "admins manage lessons" on lessons for all
+  using (exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true))
+  with check (exists (select 1 from profiles where profiles.id = auth.uid() and profiles.is_admin = true));
 
 create or replace function public.handle_new_user()
 returns trigger as $$
