@@ -1,13 +1,13 @@
-# LearnPath — Setup
+# LearnPath Setup
 
 ## Prerequisites
 
-- [Node.js LTS](https://nodejs.org) (18+)
-- [Git](https://git-scm.com)
+- Node.js LTS, version 18 or newer
+- Git
 
-That's it. No Android Studio, no extra tools.
+No Android Studio is required for normal development. Browser development uses Expo Web, and Android builds will use EAS cloud builds.
 
-## New machine setup
+## New Machine Setup
 
 ```bash
 git clone <repo-url>
@@ -15,58 +15,78 @@ cd learnpath
 ./setup.sh
 ```
 
-The script will:
-1. Check Node + git versions
-2. Create `.env` from the template (first run only)
-3. Install npm dependencies
-4. Create the database schema in Supabase
+The setup script will:
 
-If it's the first run, it'll pause and ask you to fill in `.env`. Get the values from the team, then run `./setup.sh` again.
+1. Check Node and Git.
+2. Create `.env` from `.env.example` if needed.
+3. Install npm dependencies.
+4. Create the Supabase schema and seed content.
 
-### Windows
-Run the script in **Git Bash** (comes with Git for Windows):
+If `.env` is created for the first time, fill in the values from the team, then run `./setup.sh` again.
+
+## Windows
+
+Run setup from Git Bash:
+
 ```bash
 ./setup.sh
 ```
 
-## Start the app
+## Start The App
 
 ```bash
-npm run web       # browser — fastest for dev
-npm run android   # Android device or emulator
+npm run web
 ```
 
-## Reset the database
+For Android preview later:
+
+```bash
+npm run android
+```
+
+## Reset The Database
 
 ```bash
 npm run setup-db
 ```
 
-Drops and recreates all tables from scratch. Safe to run any time.
+This drops and recreates all app tables, then seeds starter books and lessons. Use it only when you are comfortable resetting local/dev Supabase data.
 
-## Environment variables
+## Environment Variables
 
-| Variable | What it is |
-|----------|------------|
+| Variable | Purpose |
+| --- | --- |
 | `EXPO_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `EXPO_PUBLIC_SUPABASE_ANON_KEY` | Supabase public anon key |
-| `DATABASE_URL` | Postgres connection string (setup script only, never in app) |
+| `DATABASE_URL` | Postgres connection string used only by setup scripts |
 
-Get all three from the team. See `.env.example` for the format.
+`.env` is ignored by git. Never commit real keys.
 
-## Project structure
+## Admin Access
 
+The Admin tab only appears for profiles with `is_admin = true`.
+
+For dev, set this manually in Supabase SQL editor after creating your account:
+
+```sql
+update profiles
+set is_admin = true
+where email = 'your-email@example.com';
 ```
-App.tsx              ← app entry point
-src/
-  screens/           ← all screens (Home, Today, Library, Profile, Auth, Onboarding)
-  navigation/        ← tab navigator + auth gate
-  context/           ← AuthContext (Supabase session)
-  data/              ← seeded books (local, no DB needed)
-  lib/               ← supabase client, shared types
-  theme.ts           ← colors, typography, spacing
-scripts/
-  setup-db.mjs       ← DB schema script (run via npm run setup-db)
-reference/           ← Rahul's original prototype (read-only reference)
-context/             ← project documentation (PRODUCT.md, TASKS.md, etc.)
+
+Sign out and sign back in if the tab does not appear immediately.
+
+## Project Structure
+
+```text
+App.tsx              app entry point
+src/screens/         app screens
+src/navigation/      tab navigator and auth gate
+src/context/         AuthContext
+src/hooks/           data hooks
+src/lib/             Supabase client and shared types
+src/theme.ts         colors, typography, spacing
+scripts/            setup and database scripts
+context/            project docs and Claude/Rahul context
+reference/          old prototype, read-only reference
 ```

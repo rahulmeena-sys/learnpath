@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   grid: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xl },
   row: { gap: spacing.sm, marginBottom: spacing.sm },
   card: { flex: 1, height: 208, borderRadius: radius.lg, overflow: 'hidden' },
-  cardOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(0,0,0,0.35)' },
+  cardOverlay: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(0,0,0,0.35)' },
   cardInner: { flex: 1, padding: spacing.md, justifyContent: 'space-between' },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between' },
   typeChip: { backgroundColor: 'rgba(0,0,0,0.35)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.full },
